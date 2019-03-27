@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.1"> </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <script src="sketch.js"></script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <meta charset="utf-8">
+
+  </head>
+  <body>
+
+    <div class="left">
+        <canvas id="scatter" width="400". height="400"></canvas>
+    </div>
+    
+    <div class="left">
+        <select id="sel">
+            <option selected="selected">Линейная</option>
+            <option>Полиноминальная</option>
+            <option>Гиперболическая</option>
+            <option>Полулогарифмическая</option>
+            <option>Степенная</option>
+            <option>Квадратный корень</option>
+            <option>Показательная</option>
+        </select>
+        <button onclick="run()">Сбросить коэффициенты</button>
+      
+          <p id="eq"></p>
+          <p id="ss"></p>
+          <p id="a"></p>
+          <p id="rsd"></p>
+          <p id="mb"></p>
+          <p id="ma"></p>
+          Стьюдент (таблич.) = <input id="t" type="number" value="0">
+          <p id="tb"></p>
+          <p id="ta"></p>
+    </div>
+</body></html>
