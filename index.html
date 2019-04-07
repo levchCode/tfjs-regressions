@@ -13,7 +13,7 @@
         <canvas id="scatter" width="400". height="400"></canvas>
     </div>
     
-    <div class="left">
+    <div>
         <select id="sel">
             <option selected="selected">Линейная</option>
             <option>Полиноминальная</option>
@@ -24,15 +24,27 @@
             <option>Показательная</option>
         </select>
         <button onclick="run()">Сбросить коэффициенты</button>
-      
+    </div>
+    <div class="left">
           <p id="eq"></p>
           <p id="ss"></p>
+          <p id="sr"></p>
           <p id="a"></p>
+          Фишер (таблич.) = <input id="f" type="number" value="5.99">
+          <p id="F"></p>
+          <p id="F2"></p>
           <p id="rsd"></p>
+          <p id="r2"></p>
+    </div>
+    <div class="left">
           <p id="mb"></p>
           <p id="ma"></p>
-          Стьюдент (таблич.) = <input id="t" type="number" value="0">
+          <p id="mr"></p>
+          Стьюдент (таблич.) = <input id="t" type="number" value="2.447">
           <p id="tb"></p>
           <p id="ta"></p>
+          <p id="tr"></p>
+          <p id="ai"></p>
+          <p id="bi"></p>
     </div>
 </body></html>
