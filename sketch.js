@@ -5,11 +5,14 @@ let a, b, c, n, mn1, ttab
 
 let ctx;
 let lineX = [];
+let lineX_plt = [];
+let x_max;
 
 let optimizer = tf.train.adamax(0.5)
 
 function preload() {
-  dataset = loadTable('data.csv','csv','header')
+  URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz8hfWGPqxwUYHHN5dcwugyjDBAiM-4m5409-UjpV-K2xb9raEqCmGUH4ucIESEeQ37QI0KM5yaXNj/pub?gid=0&single=true&output=csv"
+  dataset = loadTable(URL,'csv','header')
 }
 
 function setup() {
@@ -41,9 +44,13 @@ function setup() {
   //   y_vals[i] = y + 0.000001
   // }
 
+  x_max = Math.ceil(Math.max(...x_vals) / n)
   for (i = 0; i < n; i++) {
-    lineX.push(i*3)
+    lineX.push(i*x_max)
   }
+
+
+  
   
   a = tf.variable(tf.scalar(0));
   b = tf.variable(tf.scalar(0));
@@ -53,7 +60,7 @@ function setup() {
   
 }
 
-function run()
+function restart()
 {
   a = tf.variable(tf.scalar(0));
   b = tf.variable(tf.scalar(0));
@@ -97,7 +104,7 @@ function stats(x, y, y_p)
     document.getElementById("r2").innerHTML = "r<sup>2</sup> = " + r2.dataSync()[0].toFixed(4)
     document.getElementById("a").innerHTML = "A = " + A.dataSync()[0].toFixed(4)
     document.getElementById("F").innerHTML = "F = " + F_l.toFixed(4)
-    document.getElementById("F2").innerHTML = "F = " + F_n.toFixed(4)
+    document.getElementById("F2").innerHTML = "F<sub>н</sub> = " + F_n.toFixed(4)
     document.getElementById("mb").innerHTML = "m<sub>b</sub> = " + mb.dataSync()[0].toFixed(4)
     document.getElementById("ma").innerHTML = "m<sub>a</sub> = " + ma.dataSync()[0].toFixed(4)
     document.getElementById("mr").innerHTML = "m<sub>r</sub> = " + mr.dataSync()[0].toFixed(4)
@@ -155,7 +162,9 @@ function stats(x, y, y_p)
 
 function loss(pred, labels) 
 {
-	return pred.sub(labels).square().mean()
+  x = tf.tensor1d(x_vals);
+  stats(x, labels, pred)
+  return pred.sub(labels).square().mean()
 }
 
 
@@ -178,7 +187,7 @@ function predict(x) {
     case "Полиноминальная": 
     // y = a + bx + cx^2;
     y_p = x.mul(b).add(x.square().mul(c)).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + " + " + b.dataSync()[0].toFixed(4) + "x + " + c.dataSync()[0].toFixed(4) + "x^2"
+    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + " + " + b.dataSync()[0].toFixed(4) + "x + " + c.dataSync()[0].toFixed(4) + "x<sup>2</sup>"
     break;
     case "Полулогарифмическая": 
     // y = a + b*lnx;
@@ -193,7 +202,7 @@ function predict(x) {
     case "Показательная": 
     // y = ab^x;
     y_p = a.mul(b.pow(x));
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "*" + b.dataSync()[0].toFixed(4) + "^x"
+    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "*" + b.dataSync()[0].toFixed(4) + "<sup>x</sup>"
     break;
     case "Гиперболическая": 
     // y = a+b/x;
@@ -203,17 +212,26 @@ function predict(x) {
     case "Квадратный корень": 
     // y = a+b*sqrt(x);
     y_p = b.mul(x.sqrt()).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+" + b.dataSync()[0].toFixed(4) + "sqrt(x)"
+    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+" + b.dataSync()[0].toFixed(4) + "√x"
+    break;
+    case "Гармоника": 
+    // y = a+b*sqrt(x);
+    y_p = a.add(b.mul(tf.cos(x.mul(tf.scalar(PI*2).div(n))))).add(c.mul(tf.sin(x.mul(tf.scalar(PI*2).div(n)))));
+    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+" + b.dataSync()[0].toFixed(4) + "cos(t*2π/n)" + "+" + c.dataSync()[0].toFixed(4) + "sin(t*2π/n)"
     break;
   }
 
-  stats(x, y, y_p)
   return y_p
 }
 
 
 
 function draw() {
+  m = parseInt(document.getElementById("m").value)
+  lineX_plt = []
+  for (i = 0; i < n.dataSync()[0] + m; i++) {
+    lineX_plt.push(i*x_max)
+  }
   
   tf.tidy(() => {
       const y = tf.tensor1d(y_vals);
@@ -221,10 +239,11 @@ function draw() {
   });
   
   const ys = tf.tidy(() => predict(lineX));
+  const ys_plt = tf.tidy(() => predict(lineX_plt));
 
   reg_pred = []
-  for (var i = 0; i < lineX.length; i++) {
-    reg_pred.push({x:lineX[i], y:ys.dataSync()[i]})
+  for (var i = 0; i < lineX_plt.length; i++) {
+    reg_pred.push({x:lineX_plt[i], y:ys_plt.dataSync()[i]})
   }
   
 	new Chart(ctx, {
@@ -254,4 +273,5 @@ function draw() {
   }
 );
 ys.dispose();
+ys_plt.dispose();
 }

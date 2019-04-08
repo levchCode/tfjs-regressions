@@ -2,7 +2,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.1"> </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-  <script src="sketch.js"></script>
+  <script type="text/javascript" src="sketch.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <meta charset="utf-8">
 
@@ -24,8 +24,13 @@
             <option>Степенная</option>
             <option>Квадратный корень</option>
             <option>Показательная</option>
+            <option>Гармоника</option>
         </select>
-        <button onclick="run()">Сбросить коэффициенты</button>
+        <button onclick="restart()">Сбросить коэффициенты</button>
+        <br>
+        <br>
+        Доп. точки = <input id="m" type="number" value="0">
+        
     </div>
     <div class="left">
           <p id="eq"></p>
