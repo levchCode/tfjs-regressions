@@ -2,3 +2,12 @@
   float: left;
   margin-right: 20px;
 }
+
+.right {
+  float: right;
+  margin-left: 20px;
+}
+
+.katex {
+  font-size: 2em !important;
+}

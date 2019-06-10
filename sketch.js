@@ -7,8 +7,9 @@ let ctx;
 let lineX = [];
 let lineX_plt = [];
 let x_max;
+let learning_rate = 0.5
 
-let optimizer = tf.train.adamax(0.5)
+let optimizer = tf.train.adam(learning_rate)
 
 function preload() {
   URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz8hfWGPqxwUYHHN5dcwugyjDBAiM-4m5409-UjpV-K2xb9raEqCmGUH4ucIESEeQ37QI0KM5yaXNj/pub?gid=0&single=true&output=csv"
@@ -22,6 +23,7 @@ function setup() {
   
   n = dataset.getRowCount()
   d = []
+  
   for (var i = 0; i < n; i++) {
     x = dataset.getNum(i, "x")
     y = dataset.getNum(i, "y")
@@ -45,16 +47,14 @@ function setup() {
   // }
 
   x_max = Math.ceil(Math.max(...x_vals) / n)
+
   for (i = 0; i < n; i++) {
     lineX.push(i*x_max)
   }
 
-
-  
-  
-  a = tf.variable(tf.scalar(0));
-  b = tf.variable(tf.scalar(0));
-  c = tf.variable(tf.scalar(0));
+  a = tf.variable(tf.scalar(0.01));
+  b = tf.variable(tf.scalar(0.01));
+  c = tf.variable(tf.scalar(0.01));
   nm1 = tf.variable(tf.scalar(n-2));
   n = tf.variable(tf.scalar(n));
   
@@ -99,22 +99,22 @@ function stats(x, y, y_p)
     let b_l = b.sub(tf.scalar(parseFloat(document.getElementById("t").value)).mul(mb))
     let b_h = b.add(tf.scalar(parseFloat(document.getElementById("t").value)).mul(mb))
 
-    document.getElementById("rsd").innerHTML = "σ<sub>ост</sub> = " + residual_dev.dataSync()[0].toFixed(4)
-    document.getElementById("sr").innerHTML = "S<sub>ост</sub> = " + s_res.dataSync()[0].toFixed(4)
+    document.getElementById("rsd").innerHTML = "σ<sub>residual</sub> = " + residual_dev.dataSync()[0].toFixed(4)
+    document.getElementById("sr").innerHTML = "S<sub>residual</sub> = " + s_res.dataSync()[0].toFixed(4)
     document.getElementById("r2").innerHTML = "r<sup>2</sup> = " + r2.dataSync()[0].toFixed(4)
     document.getElementById("a").innerHTML = "A = " + A.dataSync()[0].toFixed(4)
     document.getElementById("F").innerHTML = "F = " + F_l.toFixed(4)
-    document.getElementById("F2").innerHTML = "F<sub>н</sub> = " + F_n.toFixed(4)
+    document.getElementById("F2").innerHTML = "F<sub>non-linear</sub> = " + F_n.toFixed(4)
     document.getElementById("mb").innerHTML = "m<sub>b</sub> = " + mb.dataSync()[0].toFixed(4)
     document.getElementById("ma").innerHTML = "m<sub>a</sub> = " + ma.dataSync()[0].toFixed(4)
     document.getElementById("mr").innerHTML = "m<sub>r</sub> = " + mr.dataSync()[0].toFixed(4)
     document.getElementById("tb").innerHTML = "t<sub>b</sub> = " + tb[0].toFixed(4)
     document.getElementById("ta").innerHTML = "t<sub>a</sub> = " + ta[0].toFixed(4)
     document.getElementById("tr").innerHTML = "t<sub>r</sub> = " + tr[0].toFixed(4)
-    document.getElementById("ai").innerHTML = "Доверительный интервал (a) = [" + a_l.dataSync()[0].toFixed(4) + "; " + a_h.dataSync()[0].toFixed(4) + "]"
-    document.getElementById("bi").innerHTML = "Доверительный интервал (b) = [" + b_l.dataSync()[0].toFixed(4) + "; " + b_h.dataSync()[0].toFixed(4) + "]"
+    document.getElementById("ai").innerHTML = "Confidence interval (a) = [" + a_l.dataSync()[0].toFixed(4) + "; " + a_h.dataSync()[0].toFixed(4) + "]"
+    document.getElementById("bi").innerHTML = "Confidence interval (b) = [" + b_l.dataSync()[0].toFixed(4) + "; " + b_h.dataSync()[0].toFixed(4) + "]"
 
-    if ( F_l >= parseFloat(document.getElementById("f").value))
+    if (F_l >= parseFloat(document.getElementById("f").value))
     {
       document.getElementById("F").style.cssText = "color: green"
     }
@@ -167,6 +167,11 @@ function loss(pred, labels)
   return pred.sub(labels).square().mean()
 }
 
+function format (n)
+{
+  return (n<0?"":"+") + n
+}
+
 
 function predict(x) {
   var e = document.getElementById("sel");
@@ -177,59 +182,60 @@ function predict(x) {
 
   let y_p; 
 
+
   switch(model)
   {
-    case "Линейная":
+    case "Linear":
     // y = a + bx;
     y_p = x.mul(b).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + " + " + b.dataSync()[0].toFixed(4) + "x"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + format(b.dataSync()[0].toFixed(4)) + "x"
     break;
-    case "Полиноминальная": 
+    case "Polynomial": 
     // y = a + bx + cx^2;
     y_p = x.mul(b).add(x.square().mul(c)).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + " + " + b.dataSync()[0].toFixed(4) + "x + " + c.dataSync()[0].toFixed(4) + "x<sup>2</sup>"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + format(b.dataSync()[0].toFixed(4)) + "x " + format(c.dataSync()[0].toFixed(4)) + "x^2"
     break;
-    case "Полулогарифмическая": 
+    case "Logarithmic": 
     // y = a + b*lnx;
     y_p = b.mul(x.log()).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + " + " + b.dataSync()[0].toFixed(4) + "ln(x)"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + format(b.dataSync()[0].toFixed(4)) + "\\ln(x)"
     break;
-    case "Степенная": 
+    case "Power": 
     // y = ax^b;
     y_p = a.mul(x.pow(b));
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "x^" + b.dataSync()[0].toFixed(4)
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + "x^{" + b.dataSync()[0].toFixed(4) + "}"
     break;
-    case "Показательная": 
+    case "Exponential": 
     // y = ab^x;
     y_p = a.mul(b.pow(x));
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "*" + b.dataSync()[0].toFixed(4) + "<sup>x</sup>"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + format(b.dataSync()[0].toFixed(4)) + "^x"
     break;
-    case "Гиперболическая": 
+    case "Hyperbolic": 
     // y = a+b/x;
     y_p = b.div(x).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+(" + b.dataSync()[0].toFixed(4) + "/x)"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + "+" + "\\frac{" + b.dataSync()[0].toFixed(4) + "}{x}"
     break;
-    case "Квадратный корень": 
+    case "Square Root": 
     // y = a+b*sqrt(x);
     y_p = b.mul(x.sqrt()).add(a);
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+" + b.dataSync()[0].toFixed(4) + "√x"
-    break;
-    case "Гармоника": 
-    // y = a+b*sqrt(x);
-    y_p = a.add(b.mul(tf.cos(x.mul(tf.scalar(PI*2).div(n))))).add(c.mul(tf.sin(x.mul(tf.scalar(PI*2).div(n)))));
-    document.getElementById("eq").innerHTML = "y = " + a.dataSync()[0].toFixed(4) + "+" + b.dataSync()[0].toFixed(4) + "cos(t*2π/n)" + "+" + c.dataSync()[0].toFixed(4) + "sin(t*2π/n)"
+    eq = "\\hat{y} = " + a.dataSync()[0].toFixed(4) + format(b.dataSync()[0].toFixed(4)) + "\\sqrt{x}"
     break;
   }
+
+  katex.render(eq, document.getElementById("eq") , {
+    throwOnError: false
+  });
 
   return y_p
 }
 
 
-
 function draw() {
   m = parseInt(document.getElementById("m").value)
+  
   lineX_plt = []
-  for (i = 0; i < n.dataSync()[0] + m; i++) {
+  n_f = n.dataSync()[0]
+  for (i = 0; i < n_f + m; i += 0.5) {
     lineX_plt.push(i*x_max)
   }
   
@@ -255,12 +261,12 @@ function draw() {
     data: {
         datasets: [
           {
-            label:"Данные",
+            label:"Data",
             backgroundColor: 'rgb(255, 99, 132)',
             data: d
           },
           {
-            label:"Регрессия",
+            label:"Regression",
             type:"line",
             backgroundColor: 'rgb(0, 0, 0)',
             borderColor: 'black',

@@ -2,56 +2,63 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.1"> </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
   <script type="text/javascript" src="sketch.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <meta charset="utf-8">
 
   </head>
   <body>
-
-    <a href="multi.html">Теперь и множественная регрессия</a>
+    <div>
+        <p id="eq"></p>
+    </div>
 
     <div class="left">
-        <canvas id="scatter" width="400". height="400"></canvas>
+        <canvas id="scatter" width="600" height="600"></canvas>
     </div>
     
     <div>
         <select id="sel">
-            <option selected="selected">Линейная</option>
-            <option>Полиноминальная</option>
-            <option>Гиперболическая</option>
-            <option>Полулогарифмическая</option>
-            <option>Степенная</option>
-            <option>Квадратный корень</option>
-            <option>Показательная</option>
-            <option>Гармоника</option>
+            <option selected="selected">Linear</option>
+            <option>Polynomial</option>
+            <option>Hyperbolic</option>
+            <option>Logarithmic</option>
+            <option>Power</option>
+            <option>Square Root</option>
+            <option>Exponential</option>
         </select>
-        <button onclick="restart()">Сбросить коэффициенты</button>
+        <button onclick="restart()">Reset coeffs</button>
         <br>
         <br>
-        Доп. точки = <input id="m" type="number" value="0">
-        
+        Additional points = <input id="m" type="number" value="0">
+      
     </div>
+
     <div class="left">
-          <p id="eq"></p>
           <p id="ss"></p>
           <p id="sr"></p>
           <p id="a"></p>
-          Фишер (таблич.) = <input id="f" type="number" value="5.99">
+          Fisher (table) = <input id="f" type="number" value="5.99">
           <p id="F"></p>
           <p id="F2"></p>
           <p id="rsd"></p>
           <p id="r2"></p>
     </div>
+
     <div class="left">
           <p id="mb"></p>
           <p id="ma"></p>
           <p id="mr"></p>
-          Стьюдент (таблич.) = <input id="t" type="number" value="2.447">
+          Student's t-distribution (table) = <input id="t" type="number" value="2.447">
           <p id="tb"></p>
           <p id="ta"></p>
           <p id="tr"></p>
-          <p id="ai"></p>
-          <p id="bi"></p>
     </div>
+
+    <div class="left">
+        <p id="ai"></p>
+        <p id="bi"></p>
+    </div>
+
 </body></html>
