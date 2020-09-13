@@ -13,7 +13,7 @@ let optimizer = tf.train.adam(learning_rate)
 
 function preload() {
   URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz8hfWGPqxwUYHHN5dcwugyjDBAiM-4m5409-UjpV-K2xb9raEqCmGUH4ucIESEeQ37QI0KM5yaXNj/pub?gid=0&single=true&output=csv"
-  dataset = loadTable(URL,'csv','header')
+  dataset = loadTable('data.csv','csv','header')
 }
 
 function setup() {
